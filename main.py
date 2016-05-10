@@ -5,7 +5,7 @@ import subprocess
 import json
 from hashlib import sha1 
 
-package_name = "Grunt Custom Deploy"
+package_name = "sublime-grunt"
 package_url = "https://github.com/nicknelson/sublime-grunt"
 cache_file_name = ".sublime-grunt.cache"
 
@@ -24,14 +24,15 @@ class GruntRunner(object):
             sublime.error_message("Could not read available tasks\n")
         else:
             settings = sublime.load_settings('SublimeGrunt.sublime-settings')
+            available_tasks = json_result["available_tasks"]
             if settings:
-                available_tasks = settings.get('available_tasks')
-                if available_tasks:
-                    filtered_tasks = [obj for obj in json_result.items() if any(obj[1]['name'] in s for s in available_tasks)]
-                    if not filtered_tasks:
-                        filtered_tasks = json_result.items()
-                else: 
-                    filtered_tasks = json_result.items()
+                available_tasks += settings.get('available_tasks')
+            if available_tasks:
+                filtered_tasks = [obj for obj in json_result["tasks"].items() if any(obj[1]['name'] in s for s in available_tasks)]
+                if not filtered_tasks:
+                    filtered_tasks = json_result["tasks"].items()
+            else: 
+                filtered_tasks = json_result["tasks"].items()
 
             tasks = [[name, task['info'], task['meta']['info']] for name, task in filtered_tasks]
             return sorted(tasks, key=lambda task: task)
@@ -62,7 +63,7 @@ class GruntRunner(object):
            try:
                 data = json.load(json_data)
                 if data[self.chosen_gruntfile]["sha1"] == filesha1:
-                    return data[self.chosen_gruntfile]["tasks"]
+                    return data[self.chosen_gruntfile]
            finally:
                json_data.close()
         self.callcount += 1
@@ -104,6 +105,8 @@ class GruntRunner(object):
         if self.tasks is not None:
             #fix quick panel unavailable
             sublime.set_timeout(lambda:  self.window.show_quick_panel(self.tasks, self.pass_argument), 1)
+
+    # todo: add optional prompt function (which gets its options from a prompt task and passes them to it as args) to select a server, etc..
 
     def pass_argument(self, task):
         self.this_task = task;

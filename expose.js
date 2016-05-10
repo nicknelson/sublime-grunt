@@ -23,11 +23,14 @@ module.exports = function(grunt) {
       gruntFileName = path.join(cwd, gruntFileName);
       var cacheFileName = path.join(cwd, '.sublime-grunt.cache');
       var sha1 = generatesha1(gruntFileName);
+
+      var sublime_grunt_tasks = grunt.config('sublime_grunt_tasks');
         
       var gruntsublimecache = (grunt.file.exists(cacheFileName) && grunt.file.readJSON(cacheFileName)) || {};
 
       if (!gruntsublimecache[gruntFileName] || gruntsublimecache[gruntFileName].sha1 !== sha1) {
         var tasks = grunt.task._tasks;
+        var available_tasks = grunt.config('sublime_grunt_tasks');
         
         _.each( tasks, function( value, key, list ) {
           // We don't want to shouw or own task
@@ -55,6 +58,7 @@ module.exports = function(grunt) {
         gruntsublimecache[gruntFileName] = gruntsublimecache[gruntFileName] || {};
         gruntsublimecache[gruntFileName].sha1 = sha1;
         gruntsublimecache[gruntFileName].tasks = tasks;
+        gruntsublimecache[gruntFileName].available_tasks = available_tasks || {};
 
         grunt.file.write(cacheFileName, JSON.stringify(gruntsublimecache));
       }

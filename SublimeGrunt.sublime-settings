@@ -1,4 +1,4 @@
 {
     "exec_args": {},
-    "available_tasks": ["custom-deploy"]
+    "available_tasks": []
 }
