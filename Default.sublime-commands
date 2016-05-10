@@ -1,21 +1,21 @@
 [
     {
-        "caption": "Grunt",
+        "caption": "Grunt Custom Deploy",
         "command": "grunt"
     },
     {
-        "caption": "Grunt: Kill Running Tasks",
+        "caption": "Grunt Custom Deploy: Kill Running Tasks",
         "command": "grunt_kill"
     },
     {
-        "caption": "Preferences: Grunt - Settings – Default",
+        "caption": "Preferences: Grunt Custom Deploy - Settings – Default",
         "command": "open_file", "args":
         {
-            "file": "${packages}/Grunt/SublimeGrunt.sublime-settings"
+            "file": "${packages}/Grunt Custom Deploy/SublimeGrunt.sublime-settings"
         }
     },
     {
-        "caption": "Preferences: Grunt - Settings – User",
+        "caption": "Preferences: Grunt Custom Deploy - Settings – User",
         "command": "open_file", "args":
         {
             "file": "${packages}/User/SublimeGrunt.sublime-settings"

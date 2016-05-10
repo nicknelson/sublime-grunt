@@ -5,8 +5,8 @@ import subprocess
 import json
 from hashlib import sha1 
 
-package_name = "Grunt"
-package_url = "https://github.com/tvooo/sublime-grunt"
+package_name = "Grunt Custom Deploy"
+package_url = "https://github.com/nicknelson/sublime-grunt"
 cache_file_name = ".sublime-grunt.cache"
 
 
@@ -23,7 +23,17 @@ class GruntRunner(object):
             self.window.new_file().run_command("grunt_error", {"message": "SublimeGrunt: JSON is malformed\n\n%s\n\n" % e})
             sublime.error_message("Could not read available tasks\n")
         else:
-            tasks = [[name, task['info'], task['meta']['info']] for name, task in json_result.items()]
+            settings = sublime.load_settings('SublimeGrunt.sublime-settings')
+            if settings:
+                available_tasks = settings.get('available_tasks')
+                if available_tasks:
+                    filtered_tasks = [obj for obj in json_result.items() if any(obj[1]['name'] in s for s in available_tasks)]
+                    if not filtered_tasks:
+                        filtered_tasks = json_result.items()
+                else: 
+                    filtered_tasks = json_result.items()
+
+            tasks = [[name, task['info'], task['meta']['info']] for name, task in filtered_tasks]
             return sorted(tasks, key=lambda task: task)
 
     def run_expose(self):
@@ -93,12 +103,18 @@ class GruntRunner(object):
         self.tasks = self.list_tasks()
         if self.tasks is not None:
             #fix quick panel unavailable
-            sublime.set_timeout(lambda:  self.window.show_quick_panel(self.tasks, self.on_done), 1)
+            sublime.set_timeout(lambda:  self.window.show_quick_panel(self.tasks, self.pass_argument), 1)
 
-    def on_done(self, task):
-        if task > -1:
+    def pass_argument(self, task):
+        self.this_task = task;
+        this_path = self.window.active_view().file_name()
+        self.window.show_input_panel("Enter Arguments", this_path, self.on_done, None, None)
+
+    def on_done(self, arg):
+        if self.this_task > -1:
             path = get_env_path()
-            exec_args = {'cmd': "grunt --no-color " + self.tasks[task][0], 'shell': True, 'working_dir': self.wd, 'path': path}
+            passedArgument = ':'+arg;
+            exec_args = {'cmd': "grunt --no-color " + self.tasks[self.this_task][0] + passedArgument, 'shell': True, 'working_dir': self.wd, 'path': path}
             self.window.run_command("exec", exec_args)
 
 
@@ -155,5 +171,4 @@ class GruntKillCommand(sublime_plugin.WindowCommand):
 class GruntErrorCommand(sublime_plugin.TextCommand):
     def run(self, edit, **args):
         view = self.view
-        prefix = "Please file an issue on " + package_url + "/issues and attach this output.\n\n"
-        view.insert(edit, 0, prefix + args["message"])
+        view.insert(edit, 0, args["message"])
