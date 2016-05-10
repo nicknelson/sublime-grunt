@@ -28,7 +28,7 @@ class GruntRunner(object):
             if settings:
                 available_tasks += settings.get('available_tasks')
             if available_tasks:
-                filtered_tasks = [obj for obj in json_result["tasks"].items() if any(obj[1]['name'] in s for s in available_tasks)]
+                filtered_tasks = [obj for obj in json_result["tasks"].items() if obj[1]['name'] in available_tasks]
                 if not filtered_tasks:
                     filtered_tasks = json_result["tasks"].items()
             else: 
