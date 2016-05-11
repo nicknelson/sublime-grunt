@@ -1,7 +1,7 @@
 sublime-grunt
 =============
 
-Formed from [tvooo/sublime-grunt](https://github.com/tvooo/sublime-grunt).
+Forked from [tvooo/sublime-grunt](https://github.com/tvooo/sublime-grunt).
 
 Added ability to filter the list of tasks shown in the list by adding an array of tasks in your grunt config:
 
