@@ -117,7 +117,7 @@ class GruntRunner(object):
             if self.task_args[task][arg_i]["type"] == "text":
                 if self.task_args[task][arg_i]["default_value"]:
                     if self.task_args[task][arg_i]["default_value"] == "path":
-                        this_value = self.window.active_view().file_name()
+                        this_value = self.window.active_view().file_name().replace(':','').replace('\\','/')
                     elif self.task_args[task][arg_i]["default_value"]:
                         this_value = self.task_args[task][arg_i]["default_value"]
                 else:
