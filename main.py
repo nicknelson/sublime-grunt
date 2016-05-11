@@ -110,8 +110,7 @@ class GruntRunner(object):
             sublime.set_timeout(lambda:  self.window.show_quick_panel(self.tasks, self.pass_argument), 1)
 
     def pass_argument(self, task):
-        if task:
-            self.this_task = task
+        self.this_task = task
 
         if self.task_args[self.this_task]:
             arg_i = len(self.arg_values)
@@ -129,30 +128,25 @@ class GruntRunner(object):
                     arg_name = "Argument"
                 self.window.show_input_panel("Enter " + arg_name, this_value, self.save_argument, None, None)
             elif self.task_args[task][arg_i]["type"] == "prompt":
-                self.on_done(None)
+                self.window.show_quick_panel(self.task_args[task][arg_i]["choices"], self.save_argument)
         else:
             self.on_done(None)
 
     def save_argument(self, arg):
+        if isinstance(arg, int):
+            arg = self.task_args[self.this_task][len(self.arg_values)]["choices"][arg]
         self.arg_values.append(arg)
-        self.on_done(arg)
-        # if len(self.arg_values) == len(self.task_args[self.this_task]):
-        #     self.on_done(self.arg_values)
-        # else:
-        #     self.pass_argument
-
-    def display_prompt(self, task):
-        if task_prompt:
-            prompt_options = [{}]
-            next_step = self.on_done
-            self.window.show_quick_panel(prompt_optioms, next_step)
+        if len(self.arg_values) == len(self.task_args[self.this_task]):
+            self.on_done(self.arg_values)
         else:
-            self.on_done
+            self.pass_argument(self.this_task)
 
     def on_done(self, arg):
         if self.this_task > -1:
             path = get_env_path()
-            passedArgument = ':'+arg[0]
+            passedArgument = ""
+            if arg:
+                passedArgument = ':'+':'.join(arg)
             exec_args = {'cmd': "grunt --no-color " + self.tasks[self.this_task][0] + passedArgument, 'shell': True, 'working_dir': self.wd, 'path': path}
             self.window.run_command("exec", exec_args)
 
