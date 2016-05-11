@@ -24,8 +24,6 @@ module.exports = function(grunt) {
       var cacheFileName = path.join(cwd, '.sublime-grunt.cache');
       var sha1 = generatesha1(gruntFileName);
 
-      var sublime_grunt_tasks = grunt.config('sublime_grunt_tasks');
-        
       var gruntsublimecache = (grunt.file.exists(cacheFileName) && grunt.file.readJSON(cacheFileName)) || {};
 
       if (!gruntsublimecache[gruntFileName] || gruntsublimecache[gruntFileName].sha1 !== sha1) {
@@ -38,16 +36,21 @@ module.exports = function(grunt) {
             delete list[key];
           }
           else {
+            var grunt_args = grunt.config(key+".args") || [];
+            if ( grunt_args.length > 0) {
+              list[ key ].grunt_args = grunt_args;
+            } else {
+              list[ key ].grunt_args = [];
+            }
+
             // Filter away reservered words that are none-targets
-            var targets = _.difference(Object.keys(grunt.config.getRaw( key ) || {}), ['files', 'options', 'globals']);
-            
+            var targets = _.difference(Object.keys(grunt.config.getRaw( key ) || {}), ['files', 'options', 'globals', 'args']);
             if ( targets.length > 0 ) {
               list[ key ].targets = targets;
             
               if ( targets.length > 1 ) {
                 _.each( targets, function(target) {
                   var name = key + ":" + target;
-
                   list[name] = { name: name, info: 'Targets ' + name + '. ' + list[key].info || '', meta: { info: list[key].meta&&list[key].meta.info} };
                 });
               }

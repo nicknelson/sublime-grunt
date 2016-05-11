@@ -34,7 +34,8 @@ class GruntRunner(object):
             else: 
                 filtered_tasks = json_result["tasks"].items()
 
-            tasks = [[name, task['info'], task['meta']['info']] for name, task in filtered_tasks]
+            tasks = [[name, task['info'], task['meta']['info'], task['grunt_args']] for name, task in filtered_tasks]
+            # self.window.new_file().run_command("grunt_error", {"message": str(tasks)})
             return sorted(tasks, key=lambda task: task)
 
     def run_expose(self):
@@ -102,21 +103,56 @@ class GruntRunner(object):
         self.chosen_gruntfile = self.grunt_files[file]
 
         self.tasks = self.list_tasks()
+        self.task_args = [obj.pop(3) for obj in self.tasks]
         if self.tasks is not None:
+            self.arg_values = []
             #fix quick panel unavailable
             sublime.set_timeout(lambda:  self.window.show_quick_panel(self.tasks, self.pass_argument), 1)
 
-    # todo: add optional prompt function (which gets its options from a prompt task and passes them to it as args) to select a server, etc..
-
     def pass_argument(self, task):
-        self.this_task = task;
-        this_path = self.window.active_view().file_name()
-        self.window.show_input_panel("Enter Arguments", this_path, self.on_done, None, None)
+        if task:
+            self.this_task = task
+
+        if self.task_args[self.this_task]:
+            arg_i = len(self.arg_values)
+            if self.task_args[task][arg_i]["type"] == "text":
+                if self.task_args[task][arg_i]["default_value"]:
+                    if self.task_args[task][arg_i]["default_value"] == "path":
+                        this_value = self.window.active_view().file_name()
+                    elif self.task_args[task][arg_i]["default_value"]:
+                        this_value = self.task_args[task][arg_i]["default_value"]
+                else:
+                    this_value = ""
+                if self.task_args[task][arg_i]["key"]:
+                    arg_name = self.task_args[task][arg_i]["key"]
+                else:
+                    arg_name = "Argument"
+                self.window.show_input_panel("Enter " + arg_name, this_value, self.save_argument, None, None)
+            elif self.task_args[task][arg_i]["type"] == "prompt":
+                self.on_done(None)
+        else:
+            self.on_done(None)
+
+    def save_argument(self, arg):
+        self.arg_values.append(arg)
+        self.on_done(arg)
+        # if len(self.arg_values) == len(self.task_args[self.this_task]):
+        #     self.on_done(self.arg_values)
+        # else:
+        #     self.pass_argument
+
+    def display_prompt(self, task):
+        if task_prompt:
+            prompt_options = [{}]
+            next_step = self.on_done
+            self.window.show_quick_panel(prompt_optioms, next_step)
+        else:
+            self.on_done
 
     def on_done(self, arg):
         if self.this_task > -1:
             path = get_env_path()
-            passedArgument = ':'+arg;
+            passedArgument = ':'+arg[0]
             exec_args = {'cmd': "grunt --no-color " + self.tasks[self.this_task][0] + passedArgument, 'shell': True, 'working_dir': self.wd, 'path': path}
             self.window.run_command("exec", exec_args)
 
