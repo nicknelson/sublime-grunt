@@ -1,26 +1,58 @@
 sublime-grunt
 =============
 
-A Grunt task runner for Sublime Text
+Formed from [tvooo/sublime-grunt](https://github.com/tvooo/sublime-grunt).
 
-![Screencast of sublime-grunt](screencast.gif)
+Added ability to filter the list of tasks shown in the list by adding an array of tasks in your grunt config:
 
-## Installation
+```
+sublime_grunt_tasks: [
+  'some-task',
+  'another-task'
+]
+```
 
-sublime-grunt can be installed via [Sublime Package Control](https://sublime.wbond.net/). In Package Control, it is called **Grunt**. Please refer to the offical Package Control documentation to learn how to install packages.
+OR in your User settings for `SublimeGrunt.sublime-settings`:
 
-Alternatively, you can also clone the [sublime-grunt repository](https://github.com/tvooo/sublime-grunt/) into your Sublime Text packages folder.
+```
+    "available_tasks": ['some-task','another-task']
+```
+
+You can also now pass arguments as either a text field or a prompt, by adding an `args` node to your task settinsg in your grunt config:
+
+```
+    `some-task`: {
+      args: [
+        {
+          'key':'foo',
+          'type':'text',
+          'default_value': 'Bar'
+        },
+        {
+          'key':'someOptions',
+          'type':'prompt',
+          'choices':['hello','world']
+        }
+      ]
+    }
+```
+
+`type: text` will display an input panel to enter any text arguments. You can enter a `default_value` to pre-fill the argument with some text, you can also set a default value of `path` to pre-fill it will the path to the current file.
+
+`type: prompt` will display a quick panel list of options to select from. Enter the options as an array in `choices`
+
+The arguments will be passed to the grunt command in the order they appear in the task list, like `grunt some-task:arg1:arg2`
 
 ## Usage
 
 Open the command palette using Ctrl+Shift+P (or Cmd+Shift+P on Mac, respectively)
-and choose the "Grunt" command.
+and choose the "Grunt Custom Deploy" command.
 
 The plugin expects to find a Gruntfile (`Gruntfile.js` or `Gruntfile.coffee`) in an open folder.
 It displays a sorted list of available Grunt tasks out of this Grunt file.
 If it finds more than one Gruntfile, it first provides a list for selection.
 
-As of version 0.2, there is also a command to kill running tasks, for example
+There is also a command to kill running tasks, for example
 `watch` tasks.
 
 ## Settings
